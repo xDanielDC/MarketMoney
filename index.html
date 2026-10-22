@@ -144,7 +144,7 @@ function vCuadre2(){const x=dayInfo(cdate),c=S.cu[cdate]||{},lk=x.closed,f=funds
  <button class="b s" style="width:100%;margin-top:8px" onclick="share()">📤 Enviar a socios</button></div>
  <h2>Fondos actuales</h2><div class="g">${card('Base',fm(f.B))}${card('Nequi',fm(f.N))}</div>
  <h2>Historial de cuadres</h2><div class="card tw"><table><tr><th>Día</th><th class="r">Total día</th><th class="r">Pagos</th><th>Estado</th></tr>${hist||'<tr><td colspan="4">Aún no hay cuadres</td></tr>'}</table></div>`}
-const SB_URL='https://abloenoybdqadbisoxnc.supabase.co/rest/v1/',SB_KEY='sb_publishable_TNjjLGYtit_2Np1LAXHSpg_lq99ZYe3';
+const SB_URL='https://abloenoybdqadbisoxnc.supabase.co',SB_KEY='sb_publishable_TNjjLGYtit_2Np1LAXHSpg_lq99ZYe3';
 const SB=supabase.createClient(SB_URL,SB_KEY);
 async function pg(q){const o=[];for(let i=0;;i+=1000){const{data,error}=await q.range(i,i+999);if(error)throw error;o.push(...data);if(data.length<1000)break}return o}
 function mkDB(){return{doc:p=>({get:async()=>{const{data,error}=await SB.from('docs').select('data').eq('path',p).maybeSingle();if(error)throw error;return{exists:!!data,data:()=>data&&data.data}},set:async o=>{const{error}=await SB.from('docs').upsert({path:p,data:o,updated_at:new Date().toISOString()});if(error)throw error},delete:async()=>{const{error}=await SB.from('docs').delete().eq('path',p);if(error)throw error}}),
