@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Supermercado Guasimalito</title><meta name="theme-color" content="#0f7a4d"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<title>Supermercado Guasimalito</title><meta name="theme-color" content="#0f7a4d"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="manifest.webmanifest"><script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#f4f6f5;--card:#fff;--tx:#17211c;--mu:#66756d;--pr:#0f7a4d;--pr2:#e3f4ec;--bd:#dde4e0;--rd:#c0392b;--bl:#2468c9;--am:#c27a0a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1512;--card:#19221d;--tx:#e8efeb;--mu:#93a39a;--pr:#3ec586;--pr2:#17342a;--bd:#2a362f;--rd:#ff7b6b;--bl:#6aa3ff;--am:#f0b04a}}
@@ -113,7 +113,7 @@ function vCuadre(){const x=dayInfo(cdate),c=S.cu[cdate]||{},lk=x.closed,f=funds(
  <h2>Fondos actuales</h2><div class="g">${card('Base',fm(f.B))}${card('Nequi',fm(f.N))}</div>
  <h2>Historial de cuadres</h2><div class="card tw"><table><tr><th>Día</th><th class="r">Ventas</th><th class="r">Gastos+compras</th><th class="r">Caja</th><th>Estado</th></tr>${hist||'<tr><td colspan="5">Aún no hay cuadres</td></tr>'}</table></div>`}
 let qa={src:'Caja',type:'compra'};
-function cuKeep(){const a=$('cc'),b=$('cn');if(!a||(S.cu[cdate]&&S.cu[cdate].closed))return;const v=q=>q.value.replace(/\D/g,'');S.cu[cdate]={contado:v(a)===''?null:+v(a),nequi:+v(b)||0,closed:false}}
+function cuKeep(){const a=$('cc'),b=$('cn');if(!a||(S.cu[cdate]&&S.cu[cdate].closed))return;const v=q=>q.value.replace(/\D/g,'');S.cu[cdate]={contado:v(a)===''?null:+v(a),nequi:+v(b)||0,ns:($('cs')&&v($('cs'))!=='')?+v($('cs')):null,closed:false}}
 function qaRefresh(){['compra','gasto'].forEach(t=>$('qt_'+t).classList.toggle('on',qa.type==t));['Caja','Base','Nequi','Crédito'].forEach(s=>$('qs_'+s).classList.toggle('on',qa.src==s));$('q_catw').style.display=qa.type=='gasto'?'block':'none'}
 function qaSet(k,v){qa[k]=v;qaRefresh()}
 function qaCon(v){const m=(S.map||{})[v.trim().toLowerCase()];if(m){qa.type=m.type;if(m.cat)$('q_cat').value=m.cat;qaRefresh()}}
@@ -139,12 +139,11 @@ function vCuadre2(){const x=dayInfo(cdate),c=S.cu[cdate]||{},lk=x.closed,f=funds
  <div id="q_catw" style="display:${qa.type=='gasto'?'block':'none'}"><select id="q_cat">${S.cfg.cats.map(k=>`<option>${e(k)}</option>`).join('')}</select></div>
  <div class="row"><input id="q_amt" inputmode="numeric" placeholder="$ Valor" onkeydown="if(event.key=='Enter')qaAdd()"><button class="b" onclick="qaAdd()">Agregar</button></div></div>`}</div>
  <h2>Resumen</h2><div class="card"><label>Efectivo contado en caja</label><input id="cc" inputmode="numeric" placeholder="$0" value="${ct!=null?ct:''}" ${lk?'disabled':''} oninput="cuLive()">
- <label>Nequi (ventas recibidas)</label><input id="cn" inputmode="numeric" value="${nqv}" ${lk?'disabled':''} oninput="cuLive()"><div id="cl"></div>
+ <label>Saldo actual de Nequi (el que ves hoy en la app Nequi)</label><input id="cs" inputmode="numeric" placeholder="$0" value="${c.ns!=null?c.ns:''}" ${lk?'disabled':''} oninput="cuLive()"><div id="cni" class="k" style="margin:-4px 0 10px"></div><label>Ventas Nequi del día</label><input id="cn" inputmode="numeric" value="${nqv}" ${lk?'disabled':''} oninput="cuLive()"><div id="cl"></div>
  ${lk?`<button class="b d" onclick="reopen()">Reabrir cuadre</button>`:`<div class="row"><button class="b s" onclick="cuSave(0)">Guardar</button><button class="b" onclick="cuSave(1)">Cerrar día</button></div>`}
  <button class="b s" style="width:100%;margin-top:8px" onclick="share()">📤 Enviar a socios</button></div>
  <h2>Fondos actuales</h2><div class="g">${card('Base',fm(f.B))}${card('Nequi',fm(f.N))}</div>
  <h2>Historial de cuadres</h2><div class="card tw"><table><tr><th>Día</th><th class="r">Total día</th><th class="r">Pagos</th><th>Estado</th></tr>${hist||'<tr><td colspan="4">Aún no hay cuadres</td></tr>'}</table></div>`}
-const SB_URL='https://abloenoybdqadbisoxnc.supabase.co',SB_KEY='sb_publishable_TNjjLGYtit_2Np1LAXHSpg_lq99ZYe3';
 const SB=supabase.createClient(SB_URL,SB_KEY);
 async function pg(q){const o=[];for(let i=0;;i+=1000){const{data,error}=await q.range(i,i+999);if(error)throw error;o.push(...data);if(data.length<1000)break}return o}
 function mkDB(){return{doc:p=>({get:async()=>{const{data,error}=await SB.from('docs').select('data').eq('path',p).maybeSingle();if(error)throw error;return{exists:!!data,data:()=>data&&data.data}},set:async o=>{const{error}=await SB.from('docs').upsert({path:p,data:o,updated_at:new Date().toISOString()});if(error)throw error},delete:async()=>{const{error}=await SB.from('docs').delete().eq('path',p);if(error)throw error}}),
@@ -166,16 +165,19 @@ function vFondos2(){const sc=S.cfg.socios||[],R=S.movs.filter(m=>m.type=='retiro
  <button class="b s" style="margin-top:8px" onclick="openForm('retiro')">＋ Registrar retiro</button>
  <h2>Deudas pendientes</h2><div class="card tw"><table><tr><th>Proveedor</th><th class="r">Valor</th><th class="r">Restante</th><th>Obs.</th><th>Estado</th><th>Abonar</th></tr>${dd.map((d,i)=>`<tr><td>${e(d.prov)}</td><td class="r">${fm(d.amt)}</td><td class="r">${fm(d.rest)}</td><td>${e(d.obs)}</td><td>${d.rest>0?'Pendiente':'✅ Pagada'}</td><td>${d.rest>0?`<input id="ab${i}" inputmode="numeric" style="width:90px;margin:0"> <select id="af${i}" style="width:80px;margin:0"><option>Base</option><option>Nequi</option></select> <button class="b" onclick="abono(${i})">OK</button>`:''}</td></tr>`).join('')||'<tr><td>Sin deudas</td></tr>'}</table>
  <div class="row" style="margin-top:10px"><input id="dp" placeholder="Proveedor"><input id="dv" inputmode="numeric" placeholder="Valor"><input id="do" placeholder="Observación"></div><button class="b" onclick="addDeb()">Agregar deuda</button></div>`}
-function cuLive(){const x=dayInfo(cdate),v=a=>+(($(a).value||'').replace(/\D/g,''))||0,ct=$('cc').value===''?null:v('cc'),n=v('cn'),ve=ct==null?x.rc:ct+x.caja;
+function nCalc(d){let N=+S.cfg.nequi0||0,out=0,inn=0;Object.keys(IDX).sort().forEach(k=>{if(k>d)return;IDX[k].forEach(m=>{const nq=m.type=='venta'&&m.pay=='Nequi',o=OUT.includes(m.type)&&m.src=='Nequi',i=m.type=='ingreso'&&m.src=='Nequi',to=m.type=='traslado'&&m.src=='Nequi',ti=m.type=='traslado'&&m.to=='Nequi';
+ if(k<d){if(nq||i||ti)N+=m.amt;if(o||to)N-=m.amt}else{if(o||to)out+=m.amt;if(i||ti)inn+=m.amt}})});return{prev:N,out,inn}}
+function nqAuto(){const cs=$('cs');if(!cs)return;const t=cs.value.replace(/\D/g,''),i=$('cni');if(t===''){if(i)i.textContent='Opcional: si lo escribes, las ventas Nequi se calculan solas.';return}const q=nCalc(cdate),A=+t,V=A+q.out-q.inn-q.prev;$('cn').value=Math.max(0,V);if(i)i.textContent=`Saldo actual ${fm(A)} + pagos Nequi ${fm(q.out)}${q.inn?' − otros ingresos '+fm(q.inn):''} − saldo anterior ${fm(q.prev)} = ventas Nequi ${fm(V)}`}
+function cuLive(){nqAuto();const x=dayInfo(cdate),v=a=>+(($(a).value||'').replace(/\D/g,''))||0,ct=$('cc').value===''?null:v('cc'),n=v('cn'),ve=ct==null?x.rc:ct+x.caja;
  $('cl').innerHTML=`<div class="g" style="margin-bottom:12px">${card('Efectivo contado',ct==null?'—':fm(ct))}${card('Gastos (pagados de caja)','+ '+fm(x.caja))}${card('Ventas efectivo',fm(ve),'pos')}${card('Ventas Nequi',fm(n))}${card('TOTAL DÍA',fm(ve+n+x.ot),'pos')}</div>`}
-function cuSave(close){const ct=$('cc').value.replace(/\D/g,''),n=+($('cn').value.replace(/\D/g,''))||0,x=dayInfo(cdate);
+function cuSave(close){const ct=$('cc').value.replace(/\D/g,''),n=+($('cn').value.replace(/\D/g,''))||0;let x=dayInfo(cdate);
  if(close&&ct===''){alert('Escribe el efectivo contado antes de cerrar.');return}
  if(close&&!confirm('¿Cerrar el día? Quedará bloqueado.'))return;
- S.cu[cdate]={contado:ct===''?null:+ct,nequi:n,closed:!!close};
- if(close&&n>x.nq)S.movs.push({id:'m'+Date.now(),date:cdate,time:'23:59',type:'venta',amt:n-x.nq,pay:'Nequi',concept:'Ventas Nequi (cuadre)'});
+ S.movs=S.movs.filter(m=>!(m.auto=='nq'&&m.date==cdate));reidx();x=dayInfo(cdate);S.cu[cdate]={contado:ct===''?null:+ct,nequi:n,ns:($('cs').value.replace(/\D/g,'')===''?null:+$('cs').value.replace(/\D/g,'')),closed:!!close};
+ if(close&&n>x.nq)S.movs.push({id:'m'+Date.now(),date:cdate,time:'23:59',type:'venta',amt:n-x.nq,pay:'Nequi',concept:'Ventas Nequi (cuadre)',auto:'nq'});
  S.movs=S.movs.filter(m=>!(m.auto=='dep'&&m.date==cdate));if(close&&+ct>0)S.movs.push({id:'m'+Date.now()+'d',date:cdate,time:'23:58',type:'ingreso',amt:+ct,src:'Base',concept:'Efectivo del cuadre',auto:'dep'});
  save();render()}
-function reopen(){if(confirm('¿Reabrir este cuadre para modificarlo?')){S.cu[cdate].closed=false;S.movs=S.movs.filter(m=>!(m.auto=='dep'&&m.date==cdate));S.log.push({t:new Date().toISOString(),w:'Reabrió cuadre '+cdate});save();render()}}
+function reopen(){if(confirm('¿Reabrir este cuadre para modificarlo?')){S.cu[cdate].closed=false;S.movs=S.movs.filter(m=>!((m.auto=='dep'||m.auto=='nq')&&m.date==cdate));S.log.push({t:new Date().toISOString(),w:'Reabrió cuadre '+cdate});save();render()}}
 function rng(){const t=td();return{hoy:[t,t],ayer:[addD(t,-1),addD(t,-1)],sem:[mon(t),addD(mon(t),6)],semant:[addD(mon(t),-7),addD(mon(t),-1)],mes:[mS(t),mE(t)],mesant:[mS(addD(mS(t),-1)),addD(mS(t),-1)],custom:[ra||t,rb||t]}[rk]}
 function vRep(){const[a,b]=rng(),r=agg(a,b),names={hoy:'Hoy',ayer:'Ayer',sem:'Esta semana',semant:'Semana anterior',mes:'Este mes',mesant:'Mes anterior',custom:'Rango'};
  return`<h1>Reportes</h1><div class="chips">${Object.keys(names).map(k=>`<span class="chip ${rk==k?'on':''}" onclick="rk='${k}';render()">${names[k]}</span>`).join('')}</div>
